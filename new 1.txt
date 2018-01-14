@@ -1,0 +1,19 @@
+git config --global user.name "realxumai" 
+git config --global user.email "realxumai@gmail.com"
+
+cd "C:\Users\john\Documents\helloworld"
+
+git init
+git clone https://github.com/realxumai/HelloWorld.git
+
+
+git push origin master
+
+git pull origin master
+
+git remote add origin https://github.com/realxumai/HelloWorld.git
+
+git add README 
+git commit -m 'first commit'
+git push origin master
+git push -u origin master
