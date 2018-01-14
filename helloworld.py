@@ -11,7 +11,7 @@ class Mystrategy(StrategyBase):
         self.myPosition = []
         #日线数据记录
         self.day_records = []
-        #当日操作[日期,买，卖]
+        #当日操作[日期,买次数，卖次数]
         self.oneDayOpt = [0, 0, 0]
         #1111
 
@@ -22,13 +22,16 @@ class Mystrategy(StrategyBase):
 
     def on_tick(self, tick):
         t_day = tick.strtime.split('T')[0]
+        #如果是新的一天，初始化买卖次数
         if self.oneDayOpt != day[-2:]:
             self.oneDayOpt[0] = day[-2:]
             self.oneDayOpt[1] = 0
             self.oneDayOpt[2] = 0
-        bid_quantity = Mystrategy.check_price(self, tick.last_price)
-        if bid_quantity > 0:
-            #bid *****
+        #还剩买入次数则去检查买入策略    
+        if self.oneDayOpt[1] == 0:
+            bid_quantity = Mystrategy.check_price(self, tick.last_price)
+            if bid_quantity > 0 and self.get_cash().nav > bid_quantity*tick.last_price:
+                bidStock(self, tick, bid_quantity, t_day)
     def bidStock(self, tick, bid_quantity,today):
         self.open_long(tick.exchange, tick.sec_id, tick.last_price, bid_quantity)
         print("OpenLong: day %s, sec_id %s, price %s, quantity %s" %
