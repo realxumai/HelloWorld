@@ -13,7 +13,7 @@ class Mystrategy(StrategyBase):
         self.day_records = []
         #当日操作[日期,买，卖]
         self.oneDayOpt = [0, 0, 0]
-        #11111
+        #1111
 
     def on_bar(self, bar):
         day = [bar.strtime.split('T')[0], bar.open, bar.close]
