@@ -14,13 +14,14 @@ class Mystrategy(StrategyBase):
         #当日操作[日期,买次数，卖次数]
         self.oneDayOpt = [0, 0, 0]
 
-    def checkMyPositions(self, last_price):
+    def checkMyPositions(self, last_price, tick):
         '''检查仓位,若有盈利达标的则启动卖出'''
+        offer_quantity = 5000
         if len(self.myPositions) > 0:
             for index in range(len(self.myPositions)):
                 myPosition = self.myPositions[index]
                 if (last_price - myPosition[1]) / myPosition[1] > 0.1:
-                    Mystrategy.offerStock(self, tick, bid_quantity, t_day, index)
+                    Mystrategy.offerStock(self, tick, offer_quantity, index)
 
     def check_price(self, last_price):
         '''检查N日前价格.'''
@@ -59,13 +60,15 @@ class Mystrategy(StrategyBase):
                     return 5000
         except:
             return 0
+        return 0
 
-    def offerStock(self, tick, bid_quantity, today, index):
+    def offerStock(self, tick, offer_quantity, index):
         '''卖出，记录本日买入次数，更新持仓信息'''
+        t_day = tick.strtime.split('T')[0]
         self.close_long(tick.exchange, tick.sec_id,
                         tick.last_price, offer_quantity)
         print("OpenLong: day %s, sec_id %s, price %s, quantity %s" %
-              (today, tick.sec_id, tick.last_price, offer_quantity))
+              (t_day, tick.sec_id, tick.last_price, offer_quantity))
         self.oneDayOpt[2] = 1
         del self.myPositions[index]
 
@@ -81,8 +84,8 @@ class Mystrategy(StrategyBase):
     def on_bar(self, bar):
         day = [bar.strtime.split('T')[0], bar.open, bar.close]
         self.day_records.append(day)
-        print('bar_date: %s open: %s close: %s' %
-              (bar.strtime.split('T')[0], bar.open, bar.close))
+        #print('bar_date: %s open: %s close: %s' %
+        #      (bar.strtime.split('T')[0], bar.open, bar.close))
 
     def on_tick(self, tick):
         t_day = tick.strtime.split('T')[0]
@@ -91,22 +94,23 @@ class Mystrategy(StrategyBase):
             self.oneDayOpt[0] = t_day
             self.oneDayOpt[1] = 0
             self.oneDayOpt[2] = 0
-        #还剩买入次数则去检查买入策略
-        if self.oneDayOpt[1] == 0:
-            bid_quantity = Mystrategy.check_price(self, tick.last_price)
-            if bid_quantity > 0 and self.get_cash().nav > bid_quantity * tick.last_price:
-                Mystrategy.bidStock(self, tick, bid_quantity, t_day)
-        #还剩卖出次数则去检查卖出策略
-        if self.oneDayOpt[2] == 0:
-            last_price = tick.last_price
-            Mystrategy.checkMyPositions(self, last_price)
+        if  tick.last_price >0:
+            #还剩买入次数则去检查买入策略
+            if self.oneDayOpt[1] == 0:
+                bid_quantity = Mystrategy.check_price(self, tick.last_price)
+                if bid_quantity > 0 and self.get_cash().nav > (bid_quantity * tick.last_price):
+                    Mystrategy.bidStock(self, tick, bid_quantity, t_day)
+            #还剩卖出次数则去检查卖出策略
+            if self.oneDayOpt[2] == 0:
+                last_price = tick.last_price
+                Mystrategy.checkMyPositions(self, last_price, tick)
 
 
 if __name__ == '__main__':
     myStrategy = Mystrategy(
         username='18186948121',
         password='cciikk999',
-        strategy_id='598a0230-f380-11e7-8131-bc5ff468ef2f',
+        strategy_id='9bf656aa-fa6b-11e7-b943-00ff0665d720',
         subscribe_symbols='SZSE.000895.tick,SZSE.000895.bar.daily',
         mode=4,
         td_addr=''
