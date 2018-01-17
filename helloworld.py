@@ -3,7 +3,6 @@ import datetime
 
 from gmsdk.api import StrategyBase
 
-
 class Mystrategy(StrategyBase):
     def __init__(self, *args, **kwargs):
         super(Mystrategy, self).__init__(*args, **kwargs)
