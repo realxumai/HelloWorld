@@ -27,7 +27,7 @@ class Mystrategy(StrategyBase):
                 if cum_trade < self.initial_cash * 0.8:  
                     offer_quantity =int(((cum_trade-self.initial_cash * 0.5) / last_price) / 100)*100
                     if len(self.myPositions) < 1:
-                        x='123'  
+                        x='12345'  
                     for index in range(len(self.myPositions)):
                         myPosition = self.myPositions[index]
                         if (last_price - myPosition[1]) / myPosition[1] > 0.15:
