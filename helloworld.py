@@ -93,7 +93,7 @@ class Mystrategy(StrategyBase):
         self.close_long(tick.exchange, tick.sec_id,
                         tick.last_price, offer_quantity)
         print("CloseLong: day: %s, sec_id: %s, price: %s, quantity: %s, market_capitalization: %s, position: %s" %
-              (t_day, tick.sec_id, tick.last_price, offer_quantity, Mystrategy.calc_position(self, tick), (Mystrategy.calc_position(self, tick)/tick.last_price)))
+              (t_day, tick.sec_id, tick.last_price, offer_quantity, Mystrategy.calc_position(self)*tick.last_price, (Mystrategy.calc_position(self))))
         self.oneDayOpt[2] = 1
         del self.myPositions[index]
         return 1
@@ -103,7 +103,7 @@ class Mystrategy(StrategyBase):
         self.open_long(tick.exchange, tick.sec_id,
                        tick.last_price, bid_quantity)
         print("OpenLong: day: %s, sec_id: %s, price: %s, quantity: %s, market_capitalization: %s, position: %s" %
-              (today, tick.sec_id, tick.last_price, bid_quantity, Mystrategy.calc_position(self, tick), (Mystrategy.calc_position(self, tick)/tick.last_price)))
+              (today, tick.sec_id, tick.last_price, bid_quantity, Mystrategy.calc_position(self)*tick.last_price, (Mystrategy.calc_position(self))))
         self.oneDayOpt[1] = 1
         self.myPositions.append([today, tick.last_price, bid_quantity])
 
