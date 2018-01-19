@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import datetime
 
 from gmsdk.api import StrategyBase
@@ -21,7 +21,7 @@ class Mystrategy(StrategyBase):
             position_sum += myPosition[2]
         return position_sum
 
-    def checkMyPositions(self, last_price, tick):
+    def run_offerStrategy(self, last_price, tick):
         '''检查仓位,若有盈利达标的则启动卖出'''
         #市值金额
         market_capitalization = Mystrategy.calc_position(self) * last_price
@@ -48,41 +48,41 @@ class Mystrategy(StrategyBase):
                             if x == 1:
                                 break                            
 
-    def check_price(self, last_price):
+    def run_bidStrategy(self, last_price):
         '''检查N日前价格.'''
         try:
-            if self.day_records[-1]:
-                day = self.day_records[-1]
-                if (last_price - day[2]) / day[2] < -0.06:
-                    return 5000
-        except:
-            return 0
-        try:
-            if self.day_records[-2]:
-                day = self.day_records[-2]
-                if (last_price - day[2]) / day[2] < -0.06:
-                    return 5000
-        except:
-            return 0
-        try:
-            if self.day_records[-3]:
-                day = self.day_records[-3]
-                if (last_price - day[2]) / day[2] < -0.06:
-                    return 6000
+            if self.day_records[-5]:
+                day = self.day_records[-5]
+                if (last_price - day[2]) / day[2] < -0.1:
+                    return 30000
         except:
             return 0
         try:
             if self.day_records[-4]:
                 day = self.day_records[-4]
-                if (last_price - day[2]) / day[2] < -0.06:
-                    return 7000
+                if (last_price - day[2]) / day[2] < -0.085:
+                    return 20000
         except:
             return 0
         try:
-            if self.day_records[-5]:
-                day = self.day_records[-5]
-                if (last_price - day[2]) / day[2] < -0.06:
-                    return 10000
+            if self.day_records[-3]:
+                day = self.day_records[-3]
+                if (last_price - day[2]) / day[2] < -0.065:
+                    return 12000
+        except:
+            return 0  
+        try:
+            if self.day_records[-2]:
+                day = self.day_records[-2]
+                if (last_price - day[2]) / day[2] < -0.045:
+                    return 6000
+        except:
+            return 0              
+        try:
+            if self.day_records[-1]:
+                day = self.day_records[-1]
+                if (last_price - day[2]) / day[2] < -0.025:
+                    return 3000
         except:
             return 0
         return 0
@@ -110,8 +110,8 @@ class Mystrategy(StrategyBase):
     def on_bar(self, bar):
         day = [bar.strtime.split('T')[0], bar.open, bar.close]
         self.day_records.append(day)
-        print('bar_date: %s open: %s close: %s' %
-              (bar.strtime.split('T')[0], bar.open, bar.close))
+        print('bar_date: %s open: %s close: %s percentage: %s' %
+              (bar.strtime.split('T')[0], bar.open, bar.close, (bar.close-bar.open) / bar.open * 100))
 
     def on_tick(self, tick):
         t_day = tick.strtime.split('T')[0]
@@ -123,21 +123,21 @@ class Mystrategy(StrategyBase):
         if  tick.last_price >0:
             #还剩买入次数则去检查买入策略
             if self.oneDayOpt[1] == 0:
-                bid_quantity = Mystrategy.check_price(self, tick.last_price)
+                bid_quantity = Mystrategy.run_bidStrategy(self, tick.last_price)
                 x= self.get_cash()
                 if bid_quantity > 0 and self.get_cash().available > (bid_quantity * tick.last_price):
                     Mystrategy.bidStock(self, tick, bid_quantity, t_day)
             #还剩卖出次数则去检查卖出策略
             if self.oneDayOpt[2] == 0:
                 last_price = tick.last_price
-                Mystrategy.checkMyPositions(self, last_price, tick)
+                Mystrategy.run_offerStrategy(self, last_price, tick)
 
 if __name__ == '__main__':
     myStrategy = Mystrategy(
         username='18186948121',
         password='cciikk999',
         strategy_id='5c2ee202-fcbe-11e7-bc70-00ff0665d720',
-        subscribe_symbols='SZSE.000895.tick,SZSE.000895.bar.daily',
+        subscribe_symbols='SHSE.600660.tick,SHSE.600660.bar.daily',
         mode=4,
         td_addr=''
     )
